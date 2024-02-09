@@ -1,0 +1,240 @@
+#####################################################################################GRABACIÓN#########################################################################################
+
+import naranja
+import torch
+import os
+import io
+import pandas as pd
+import pathlib
+import numpy as np
+import wx
+import time
+import threading
+import cv2
+import imutils
+import recording
+import rgb_video
+from ultralytics import YOLO
+import subprocess
+import recording
+
+from tracker import*
+from glob import glob
+from PIL import Image as im
+from torchvision.utils import draw_bounding_boxes
+from IPython.display import Image, display
+
+
+####################################
+# Class NaranjasFrame
+####################################
+
+class naranjasFrameImpl (naranja.naranjaFrame):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        #self.bitmap = wx.StaticBitmap(self.bitmapPanel)
+        #self.animation = wx.AnimationCtrl(self.bitmapPanel)
+        self.detectButton.Bind(wx.EVT_BUTTON, self.iniciarProceso)
+        self.grabacionButton.Bind(wx.EVT_BUTTON, self.grabacionProceso)
+        self.tracker=Tracker()
+        self.detenerButton 
+
+############Variables###############
+
+        self.count=0
+        self.cy1=100
+        self.cy2=300
+        self.cy3=500
+        self.offset=10
+        self.oran_pass={}
+        self.counter1 = set()
+        self.counter2 = set()
+        self.counter3 = set()
+        self.estimacion = 0
+        self.long1 = 0
+        self.long2 = 0
+        self.long3 = 0
+
+#############Recording##############
+
+    def grabacionProceso(self, event):
+        self.grabacionButton.Disable()
+        self.quitRecording = threading.Event()
+        self.thread = threading.Thread(target= self.recording, args=[self.quitRecording])
+        self.thread.start()
+
+    def recording(self, threadEvent):
+        recording.run(threadEvent)
+        
+    def stopRecording(self):
+        self.quitRecording.set()
+        self.grabacionButton.Enable()
+
+####################################
+
+    def iniciarProceso(self, event):
+        self.detectButton.Disable()
+        self.thread = threading.Thread(target=self.detectarRecortar)
+        self.thread.start()
+
+    def cargaModelo(self):
+        model=YOLO(r'F:\Alberto\Interfaz\yolov8n_custom20\weights\best.pt')
+        return model
+
+    def seleccionaCarpeta(self):
+        path= self.filePickerButton.GetPath() #Elegir carpeta
+        #path = r"D:/NaranjasFinal/Interfaz/Divisiones" #Carpeta
+        return os.path.join(path)
+
+    def capturarVideo(self):
+        cap=cv2.VideoCapture(self.seleccionaCarpeta())
+        #cap = cv2.VideoCapture(rgb_video.run())
+        return cap
+    
+    def detectar(self):
+        self.counter1.clear()
+        self.counter2.clear()
+        self.counter3.clear()
+        self.medidasText.Clear()
+        self.estimaciontextCtrl.Clear()
+        self.medidasText.AppendText("Cargando Video...   ")
+        modelo = self.cargaModelo()
+        cap = self.capturarVideo()
+
+        count = self.count
+        cy1 = self.cy1
+        cy2 = self.cy2
+        cy3 = self.cy3
+        offset = self.offset
+        oran_pass = self.oran_pass
+        counter1 = self.counter1
+        counter2 = self.counter2
+        counter3 = self.counter3
+        estimacion = self.estimacion
+        long1 = self.long1
+        long2 = self.long2
+        long3 = self.long3
+
+        while True:    
+            ret,frame = cap.read()
+            if not ret:
+                break
+            count += 1
+            if count % 1 != 0:
+                continue
+
+            frame = imutils.resize(frame,width=600)
+            class_list = modelo.names
+            results=modelo.predict(frame)
+            results[0].conf = 0.35
+
+            a=results[0].boxes.data.cpu()
+            px=pd.DataFrame(a).astype("float")
+            list=[]
+                    
+            for index,row in px.iterrows():
+        
+                x1=int(row[0])
+                y1=int(row[1])
+                x2=int(row[2])
+                y2=int(row[3])
+                d=int(row[5])
+                c=class_list[d]
+                if 'Naranja' in c:
+                    list.append([x1,y1,x2,y2])
+
+            bbox_id=self.tracker.update(list)
+            for bbox in bbox_id:
+                x3,y3,x4,y4,id=bbox
+                cx=int(x3+x4)//2
+                cy=int(y3+y4)//2
+                cv2.rectangle(frame, (x3,y3), (x4,y4), (0, 0, 255), 2)
+
+                if cy1<(cx+offset) and cy1> (cx-offset):
+                    oran_pass[id] = cx
+                    cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
+                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)
+                    counter1.add(id)
+                    long1 = len(counter1)
+
+                if cy2<(cx+offset) and cy2> (cx-offset):
+                    oran_pass[id] = cx
+                    cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
+                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)
+                    counter2.add(id)
+                    long2 = len(counter2)
+
+                if cy3<(cx+offset) and cy3> (cx-offset):
+                    oran_pass[id] = cx
+                    cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
+                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)       
+                    counter3.add(id)
+                    
+                    long3 = len(counter3)
+
+            # cv2.line(frame,(cy1, 325), (cy1, 10),(255,255,255),1)
+            # cv2.line(frame,(cy2, 325), (cy2, 10),(255,255,255),1)
+            # cv2.line(frame,(cy3, 325), (cy3, 10),(255,255,255),1)
+            cv2.line(frame,(cy1, 1500), (cy1, 10),(255,255,255),1)
+            cv2.line(frame,(cy2, 1500), (cy2, 10),(255,255,255),1)
+            cv2.line(frame,(cy3, 1500), (cy3, 10),(255,255,255),1)
+            # cv2.line(frame,(cy1, 725), (cy1, 10),(255,255,255),1)
+            # cv2.line(frame,(cy2, 725), (cy2, 10),(255,255,255),1)
+            # cv2.line(frame,(cy3, 725), (cy3, 10),(255,255,255),1)
+
+            # bitmap = wx.StaticBitmap(self.bitmapPanel, wx.ID_ANY, wx.Bitmap(frame))
+            # bitmap = wx.AnimationCtrl
+            # bitmap.SetPosition((0,0))
+
+            estimacion = (long1 + long2 + long3)/3
+            estimacion = int(estimacion)
+            self.estimaciontextCtrl.SetValue(f'Linea1:  {long1}\nLinea2:  {long2}\nLinea3:  {long3}\n' + 'Estimación: ' + str(estimacion))    
+            cv2.putText(frame, ('Naranjas: ') + str(estimacion), (cy1, 50), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 2)
+            cv2.imshow("RGB", frame)
+            if cv2.waitKey(1)&0xFF==27:
+                break
+        
+        cap.release()
+        cv2.destroyAllWindows()
+        os.makedirs(r"F:\Alberto\Interfaz\Datos", exist_ok=True)
+        path = r'F:\Alberto\Interfaz\Datos/Estimacion.xlsx'
+        df = pd.DataFrame({'Estimacion 1' : [long1],
+                           'Estimacion 2' : [long2],
+                           'Estimacion 3' : [long3],
+                           'Estimacion Final' : [estimacion],})
+        
+        if os.path.exists(path):
+            df_existe = pd.read_excel(path)
+            df = pd.concat([df_existe, df], ignore_index=True)
+        
+        df.to_excel(path,index=False)
+
+        #wx.CallAfter(self.bitmap.SetBitmap, frame)
+        wx.CallAfter(self.detectButton.Enable)
+        self.medidasText.AppendText("Finalizado.")
+
+    
+
+
+###################################
+# Botones Main
+###################################
+
+    def detectarRecortar(self):
+        self.detectar()
+
+    # def stopButtonFunc(self, event):
+    #     if cv2.waitKey(1) == ord('q'):
+    #             break
+
+    def grabacionFunction(self, event):
+        self.recording()     
+    
+    def grabacionStopFunction(self, event):
+        self.stopRecording()
+
+    def closeFunc(self, event):
+        self.Close()
+
+###################################
