@@ -244,10 +244,6 @@
 
 
 
-
-
-
-
 # #####################################################################################TIEMPO REAL#########################################################################################
 
 
@@ -257,13 +253,13 @@ import pandas as pd
 import wx
 import threading
 import cv2
-#import recording
 from ultralytics import YOLO
-import depthai as dai
-
 from tracker import*
-from glob import glob
-from torchvision.utils import draw_bounding_boxes
+#import depthai as dai
+#import recording
+
+# from glob import glob
+# from torchvision.utils import draw_bounding_boxes
 #from IPython.display import Image, display
 
 
@@ -281,7 +277,7 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         #self.grabacionButton.Bind(wx.EVT_BUTTON, self.grabacionProceso)
         self.tracker=Tracker()
         self.detenerButton
-        self.stopVideoFlag = False        
+        self.stopVideoFlag = False
 ############Variables###############
 
         self.count=0
@@ -310,7 +306,7 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         self.long6 = 0
 
 ###########Create pipeline############
-        
+
    # def pipeline(self):
 
         # pipeline = dai.Pipeline()
@@ -335,7 +331,7 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         # # Linking
         # camRgb.video.link(xoutVideo.input)
 
-        
+
         # camRgb = pipeline.create(dai.node.ColorCamera)
         # camRgb.setBoardSocket(dai.CameraBoardSocket.RGB)
         # camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
@@ -357,26 +353,26 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         # xoutStill = pipeline.create(dai.node.XLinkOut)
         # xoutStill.setStreamName("still")
         # videoEnc.bitstream.link(xoutStill.input)
-        
-        
-        
+
+
+
        # return pipeline
 
 
 #############Recording##############
 
-    def grabacionProceso(self, event):
-        self.grabacionButton.Disable()
-        self.quitRecording = threading.Event()
-        self.thread = threading.Thread(target= self.recording, args=[self.quitRecording])
-        self.thread.start()
+    # def grabacionProceso(self, event):
+    #     self.grabacionButton.Disable()
+    #     self.quitRecording = threading.Event()
+    #     self.thread = threading.Thread(target= self.recording, args=[self.quitRecording])
+    #     self.thread.start()
 
-    def recording(self, threadEvent):
-        recording.run(threadEvent)
-        
-    def stopRecording(self):
-        self.quitRecording.set()
-        self.grabacionButton.Enable()
+    # def recording(self, threadEvent):
+    #     recording.run(threadEvent)
+
+    # def stopRecording(self):
+    #     self.quitRecording.set()
+    #     self.grabacionButton.Enable()
 
 ####################################
 
@@ -391,16 +387,16 @@ class naranjasFrameImpl (naranja.naranjaFrame):
     #     self.thread.start()
 
     def stopVideo(self):
-        
+
         if self.stopVideoFlag == True:
             self.closeButton.Enable()
             return self.stopVideoFlag
 
     def cargaModelo(self):
-        
-        model=YOLO(r'D:\NaranjasFinal\Interfaz\yolov8n_custom20\weights\best.pt')
+
+        model=YOLO((r'C:\Users\Servidor\Desktop\AlbertoMartinez\naranjas\Interfaz\yolov8n_custom20\weights\best.pt'))
         return model
-    
+
     def detectar(self):
         self.closeButton.Disable()
         self.counter1.clear()
@@ -415,7 +411,6 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         modelo = self.cargaModelo()
         #pipeline = self.pipeline()
 
-        count = self.count
         cx1 = self.cx1
         cx2 = self.cx2
         cx3 = self.cx3
@@ -439,9 +434,6 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         long4 = self.long4
         long5 = self.long5
         long6 = self.long6
-
-
-
         cap = cv2.VideoCapture(0)
 
         while True:
@@ -453,10 +445,10 @@ class naranjasFrameImpl (naranja.naranjaFrame):
 
         #     video = device.getOutputQueue(name="video", maxSize=1, blocking=False)
 
-        #while True:    
-         
+        #while True:
+
             # videoIn = video.get()
-        
+
             # frame = videoIn.getCvFrame()
         # with dai.Device(pipeline) as device:
 
@@ -479,9 +471,9 @@ class naranjasFrameImpl (naranja.naranjaFrame):
             a=results[0].boxes.data.cpu()
             px=pd.DataFrame(a).astype("float")
             list=[]
-                    
+
             for index,row in px.iterrows():
-        
+
                 x1=int(row[0])
                 y1=int(row[1])
                 x2=int(row[2])
@@ -515,12 +507,12 @@ class naranjasFrameImpl (naranja.naranjaFrame):
                 if cx3<(cx+offset) and cx3> (cx-offset) and cy1<(cy+offset) and cy2>(cy-offset):
                     oran_pass[id] = cx
                     cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
-                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)       
+                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)
                     counter3.add(id)
-                    
+
                     long3 = len(counter3)
 
-################### Segunda imagen ###########################               
+################### Segunda imagen ###########################
                 if cx1<(cx+offset) and cx1> (cx-offset) and cy3<(cy+offset) and cy4>(cy-offset):
                     oran_pass[id] = cx
                     cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
@@ -538,20 +530,17 @@ class naranjasFrameImpl (naranja.naranjaFrame):
                 if cx3<(cx+offset) and cx3> (cx-offset) and cy3<(cy+offset) and cy4>(cy-offset):
                     oran_pass[id] = cx
                     cv2.circle(frame,(cx,cy),4,(0,0,255),-1)
-                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)       
+                    cv2.putText(frame,str(id),(cx,cy),cv2.FONT_HERSHEY_COMPLEX,0.8,(0,255,255),2)
                     counter6.add(id)
-                    
+
                     long6 = len(counter6)
 
 ##################### ------------- ########################
 
-            cv2.line(frame,(cx1, 530), (cx1, 10),(255,255,255),1)
-            cv2.line(frame,(cx2, 530), (cx2, 10),(255,255,255),1)
-            cv2.line(frame,(cx3, 530), (cx3, 10),(255,255,255),1)
+            for cx in [cx1, cx2, cx3]:
+                cv2.line(frame, (cx, 530), (cx, 10), (255, 255, 255), 1)
+                cv2.line(frame, (cx, 550), (cx, 1070), (255, 255, 255), 1)
 
-            cv2.line(frame,(cx1, 550), (cx1, 1070),(255,255,255),1)
-            cv2.line(frame,(cx2, 550), (cx2, 1070),(255,255,255),1)
-            cv2.line(frame,(cx3, 550), (cx3, 1070),(255,255,255),1)
 
             estimacion1 = (long1 + long2 + long3)/3
             estimacion1 = int(estimacion1)
@@ -560,41 +549,39 @@ class naranjasFrameImpl (naranja.naranjaFrame):
             estimacion2 = int(estimacion2)
 
             try:
-                self.estimaciontextCtrl.SetValue(f'Linea1:  {long1}\nLinea2:  {long2}\nLinea3:  {long3}\nLinea4:  {long4}\nLinea5:  {long5}\nLinea6:  {long6}\n' 
-                                                 + 'Estimación1: ' + str(estimacion1) + '\n' + 'Estimacion2: ' + str(estimacion2) + '\n'+ 'Estimacion: ' + str(estimacion1+estimacion2))    
+                self.estimaciontextCtrl.SetValue(f'Linea1:  {long1}\nLinea2:  {long2}\nLinea3:  {long3}\nLinea4:  {long4}\nLinea5:  {long5}\nLinea6:  {long6}\n'
+                                                 + 'Estimación1: ' + str(estimacion1) + '\n' + 'Estimacion2: ' + str(estimacion2) + '\n'+ 'Estimacion: ' + str(estimacion1+estimacion2))
             except RuntimeError:
                 self.Close()
-                
+
             cv2.putText(frame, ('Naranjas: ') + str(estimacion1), (cx1, 50), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 2)
             cv2.putText(frame, ('Naranjas: ') + str(estimacion2), (cx1, 540), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 2)
 
             cv2.imshow("RGB", frame)
-            if cv2.waitKey(1)&0xFF==27:
+            key = cv2.waitKey(1) & 0xFF
+            if key == 27 or key == ord('q') or self.stopVideo():
                 break
-    
-            if cv2.waitKey(1) == ord('q'):
-                break  
-            if self.stopVideo() == True:
-                break
+            # if self.stopVideo() == True:
+            #     break
 
         cv2.destroyAllWindows()
-        os.makedirs("D:/NaranjasFinal/Interfaz/Datos/", exist_ok=True)
-        path = 'D:/NaranjasFinal/Interfaz/Datos/Estimacion.xlsx'
+        os.makedirs(r"C:/Users/Servidor/Desktop/AlbertoMartinez/Interfaz/Datos/", exist_ok=True)
+        path = r'C:/Users/Servidor/Desktop/AlbertoMartinez/Interfaz/Datos/Estimacion.xlsx'
         df = pd.DataFrame({'Estimacion 1' : [long1],
                            'Estimacion 2' : [long2],
                            'Estimacion 3' : [long3],
                            'Estimacion Final' : [estimacion1],})
-        
+
         if os.path.exists(path):
             df_existe = pd.read_excel(path)
             df = pd.concat([df_existe, df], ignore_index=True)
-        
+
         df.to_excel(path,index=False)
 
         wx.CallAfter(self.detectButton.Enable)
         self.medidasText.AppendText("Finalizado.")
         self.stopVideoFlag = False
-    
+
 
 
 ###################################
@@ -609,8 +596,8 @@ class naranjasFrameImpl (naranja.naranjaFrame):
         self.stopVideo()
 
     def grabacionFunction(self, event):
-        self.recording()     
-    
+        self.recording()
+
     def grabacionStopFunction(self, event):
         self.stopRecording()
 
