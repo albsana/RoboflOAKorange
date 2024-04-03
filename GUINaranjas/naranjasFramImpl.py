@@ -142,7 +142,10 @@ class naranjasFrameImpl (naranja.naranjaFrame):
 
         while True:
             ret, frame = cap.read()
-
+            if not recording:
+                cv2.putText(frame, ('Para iniciar grabacion pulse R'), (150, 50), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 2)
+                cv2.putText(frame, ('Para detener grabacion pulse R'), (150, 80), cv2.FONT_ITALIC, 0.8, (0, 255, 255), 2)
+        
             if ret:
                 cv2.imshow('video', frame)
                 if recording:
@@ -156,8 +159,15 @@ class naranjasFrameImpl (naranja.naranjaFrame):
                 break
             
             elif key == ord('r'):
+                frame = cv2.putText(frame, '', (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
                 recording = not recording
-                print(f'Recording: {recording}')
+                if recording: 
+                    frame = cv2.putText(frame, '', (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+                    print(f'Recording: {recording}')
+                else: 
+                    print(f'Recording: {recording}')
+                    
 
         cap.release()
         writer.release()
