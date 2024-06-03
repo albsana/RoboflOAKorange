@@ -48,26 +48,24 @@ class naranjaFrame ( wx.Frame ):
 
 		bSizer271 = wx.BoxSizer( wx.VERTICAL )
 
-		self.florCheckBox = wx.CheckBox( sbSizer5.GetStaticBox(), wx.ID_ANY, u"Flor", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.florCheckBox.Hide()
-
-		bSizer271.Add( self.florCheckBox, 0, wx.ALL, 5 )
-
 		self.naranjaCheckBox = wx.CheckBox( sbSizer5.GetStaticBox(), wx.ID_ANY, u"Naranja", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer271.Add( self.naranjaCheckBox, 0, wx.ALL, 5 )
 
 		self.naranjaVerdeCheckBox = wx.CheckBox( sbSizer5.GetStaticBox(), wx.ID_ANY, u"Naranja Verde", wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer271.Add( self.naranjaVerdeCheckBox, 0, wx.ALL, 5 )
 
+		self.florCheckBox = wx.CheckBox( sbSizer5.GetStaticBox(), wx.ID_ANY, u"Flor", wx.DefaultPosition, wx.DefaultSize, 0 )
+		bSizer271.Add( self.florCheckBox, 0, wx.ALL, 5 )
+
 
 		bSizer25.Add( bSizer271, 0, wx.EXPAND, 5 )
 
 		bSizer28 = wx.BoxSizer( wx.VERTICAL )
 
-		m_choice1Choices = [ u"Grabar", u"Predecir Tiempo Real", u"Predecir Grabacion" ]
-		self.m_choice1 = wx.Choice( sbSizer5.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
-		self.m_choice1.SetSelection( 0 )
-		bSizer28.Add( self.m_choice1, 0, wx.ALL, 5 )
+		elegirFuncionChoices = [ u"Grabar", u"Predecir Tiempo Real", u"Predecir Grabacion" ]
+		self.elegirFuncion = wx.Choice( sbSizer5.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, elegirFuncionChoices, 0 )
+		self.elegirFuncion.SetSelection( 3 )
+		bSizer28.Add( self.elegirFuncion, 0, wx.ALL, 5 )
 
 
 		bSizer25.Add( bSizer28, 0, wx.EXPAND, 5 )
@@ -88,6 +86,16 @@ class naranjaFrame ( wx.Frame ):
 
 		bSizer25.Add( bSizer261, 0, wx.EXPAND, 5 )
 
+		sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( sbSizer5.GetStaticBox(), wx.ID_ANY, u"Cámara" ), wx.VERTICAL )
+
+		elegirCamaraChoices = [ u"Insta 360", u"Cannon", u"OAK" ]
+		self.elegirCamara = wx.Choice( sbSizer7.GetStaticBox(), wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, elegirCamaraChoices, 0 )
+		self.elegirCamara.SetSelection( 3 )
+		sbSizer7.Add( self.elegirCamara, 1, wx.ALL|wx.EXPAND, 5 )
+
+
+		bSizer25.Add( sbSizer7, 0, wx.EXPAND, 5 )
+
 
 		bSizer29.Add( bSizer25, 0, wx.EXPAND, 5 )
 
@@ -98,7 +106,7 @@ class naranjaFrame ( wx.Frame ):
 		self.detectButton.SetFont( wx.Font( 36, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial Black" ) )
 		self.detectButton.SetBackgroundColour( wx.Colour( 1, 214, 12 ) )
 
-		bSizer30.Add( self.detectButton, 0, wx.ALL|wx.ALIGN_BOTTOM|wx.EXPAND, 5 )
+		bSizer30.Add( self.detectButton, 1, wx.ALL|wx.ALIGN_BOTTOM|wx.EXPAND, 5 )
 
 		self.stopButton = wx.Button( self.m_panel9, wx.ID_ANY, u"Parar", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.stopButton.SetFont( wx.Font( 22, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Arial" ) )
@@ -232,7 +240,7 @@ class naranjaFrame ( wx.Frame ):
 		self.principal.SetSizer( bSizer69 )
 		self.principal.Layout()
 		bSizer69.Fit( self.principal )
-		bSizer68.Add( self.principal, 0, wx.EXPAND |wx.ALL, 5 )
+		bSizer68.Add( self.principal, 1, wx.EXPAND |wx.ALL, 5 )
 
 
 		self.SetSizer( bSizer68 )
@@ -260,10 +268,11 @@ class naranjaFrame ( wx.Frame ):
 		self.Centre( wx.BOTH )
 
 		# Connect Events
-		self.florCheckBox.Bind( wx.EVT_CHECKBOX, self.florCheckFunc )
 		self.naranjaCheckBox.Bind( wx.EVT_CHECKBOX, self.naranjaCheckFunc )
 		self.naranjaVerdeCheckBox.Bind( wx.EVT_CHECKBOX, self.naranjaVerdeCheckFunc )
-		self.m_choice1.Bind( wx.EVT_CHOICE, self.selecFunc )
+		self.florCheckBox.Bind( wx.EVT_CHECKBOX, self.florCheckFunc )
+		self.elegirFuncion.Bind( wx.EVT_CHOICE, self.selecFunc )
+		self.elegirCamara.Bind( wx.EVT_CHOICE, self.cameraSelectFunc )
 		self.detectButton.Bind( wx.EVT_BUTTON, self.detectFunction )
 		self.stopButton.Bind( wx.EVT_BUTTON, self.stopButtonFunc )
 		self.closeButton.Bind( wx.EVT_BUTTON, self.closeFunc )
@@ -277,16 +286,19 @@ class naranjaFrame ( wx.Frame ):
 
 
 	# Virtual event handlers, override them in your derived class
-	def florCheckFunc( self, event ):
-		event.Skip()
-
 	def naranjaCheckFunc( self, event ):
 		event.Skip()
 
 	def naranjaVerdeCheckFunc( self, event ):
 		event.Skip()
 
+	def florCheckFunc( self, event ):
+		event.Skip()
+
 	def selecFunc( self, event ):
+		event.Skip()
+
+	def cameraSelectFunc( self, event ):
 		event.Skip()
 
 	def detectFunction( self, event ):
@@ -475,5 +487,8 @@ class Hiperparametros ( wx.Frame ):
 
 	def closeParamFunc( self, event ):
 		event.Skip()
+
+
+
 
 
