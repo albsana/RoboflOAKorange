@@ -7,3 +7,6 @@ if __name__ == '__main__':
     fr = naranjasFrameImpl(None)
     fr.Show()
     app.MainLoop()
+####
+#LD_PRELOAD=/lib/aarch64-linux-gnu/libGLdispatch.so python3 main.py
+####
